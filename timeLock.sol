@@ -43,7 +43,7 @@ contract MyToken is ERC20, Ownable {
         
         } 
         if(block.timestamp < releaseTime){
-          balance[to] += balance[to].add(newVal);
+          balance[to] = balance[to].add(newVal);
           _mint(to,newVal);
            
         }
