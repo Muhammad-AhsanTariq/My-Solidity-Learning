@@ -25,7 +25,7 @@ pragma solidity ^0.8.4;
    mapping(address => bal) public lockedBal;
    
     
-   error Wait_10Minutes(); 
+   error timeLimitNotComplete(); 
    
     constructor() ERC20("MyToken", "MTK") {
       Owner=msg.sender;
@@ -57,7 +57,7 @@ pragma solidity ^0.8.4;
       transfrMap[to][lockedBal[to].time]=true;
     } 
     else{
-      revert Wait_10Minutes(); 
+      revert timeLimitNotComplete(); 
     }
 
     }
