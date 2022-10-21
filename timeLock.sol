@@ -16,7 +16,8 @@ pragma solidity ^0.8.4;
     address public Owner;
 
     struct bal{
-      uint amount;
+      uint mintAmnt;
+      uint lockAmnt;
       uint time;
       address addr;
     }
@@ -24,6 +25,7 @@ pragma solidity ^0.8.4;
    mapping(address=>mapping(uint=>bool))public transfrMap;
    mapping(address => bal) public lockedBal;
    
+    
    error timeLimitNotComplete(); 
    
     constructor() ERC20("MyToken", "MTK") {
@@ -36,23 +38,23 @@ pragma solidity ^0.8.4;
         lockedVal=val*30/100;
         mintVal=val-lockedVal;
     
-        releaseTime = block.timestamp.add(uint256(600)); 
+        releaseTime = block.timestamp.add(uint256(10)); 
         
           _mint(to,mintVal);
           _mint(Owner,lockedVal);
-          lockedBal[to]=bal(lockedVal,releaseTime,to);
+          lockedBal[to]=bal(mintVal,lockedVal,releaseTime,to);
       
     }
 
     function withdraw(address to)public{
-     
+    
      require( Owner==msg.sender , "onlyOwner");
      require(transfrMap[to][lockedBal[to].time]==false, "already transfered claim balance");
      require(lockedBal[to].addr==to,"noTokenMinted");
 
      if(block.timestamp >= releaseTime){
 
-      transfer(to,lockedBal[to].amount );
+      transfer(to,lockedBal[to].lockAmnt );
       transfrMap[to][lockedBal[to].time]=true;
     } 
     else{
