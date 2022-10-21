@@ -24,7 +24,6 @@ pragma solidity ^0.8.4;
    mapping(address=>mapping(uint=>bool))public transfrMap;
    mapping(address => bal) public lockedBal;
    
-    
    error timeLimitNotComplete(); 
    
     constructor() ERC20("MyToken", "MTK") {
