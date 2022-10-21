@@ -1,51 +1,63 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol";
+  import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+  import "@openzeppelin/contracts/access/Ownable.sol";
+  import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+  import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol";
 
-contract MyToken is ERC20, Ownable {
-
-
-   mapping(address => uint) public lockTime;
-   mapping (address => uint) public  balance;
-   
-
-    constructor() ERC20("MyToken", "MTK") {
-     }
-
-    // calling SafeMath will add extra functions to the uint data type
+  contract MyToken is ERC20, Ownable {
+ 
+   // calling SafeMath will add extra functions to the uint data type
     using SafeMath for uint; // you can make a call like myUint.add(123
-    uint initialTimestamp;
     uint public releaseTime;
-    uint public rsrvBal;
-    uint public newVal;
+    uint public lockedVal;
+    uint public mintVal;
+    address public Owner;
 
-    function setLockTime(uint _seconds) public {
-      initialTimestamp = block.timestamp;
-      if (_seconds > 0) {
-               
-         releaseTime = initialTimestamp.add(uint256(_seconds));
-        }
-        // the add function below is from safemath and will take care of uint overflow
-         lockTime[msg.sender] = lockTime[msg.sender].add(_seconds);
-      }
+    struct bal{
+      address lockAddr; 
+      uint amount;
+    }
 
-    function mint( address to, uint256 val) public {
-      
-        rsrvBal= val.div(100).mul(30);
-        newVal=val-rsrvBal;
-          
-         if(block.timestamp > releaseTime){
-          balance[to] = balance[to].add(rsrvBal);
-          _mint(to,rsrvBal);
+   mapping(address=>bool)public transfered;
+   mapping(address => bal) public lockedBal;
+    
+   error Wait_10Minutes(); 
+   
+    constructor() ERC20("MyToken", "MTK") {
+      Owner=msg.sender;
+     }
+    
+    function mint( address to, uint val) public {
+      require( msg.sender != Owner, "Owner not allow");
+       
+        lockedVal=val*30/100;
+        mintVal=val-lockedVal;
+    
+        releaseTime = block.timestamp.add(uint256(600)); 
         
-        } 
-        if(block.timestamp < releaseTime){
-          balance[to] = balance[to].add(newVal);
-          _mint(to,newVal);
-           
-        }
+          _mint(to,mintVal);
+          _mint(Owner,lockedVal);
+        
+          lockedBal[to]=bal(to,lockedVal);
+      
+    }
+
+    function withdraw(address to)public{
+   
+     require( Owner==msg.sender , "onlyOwner");
+     require(transfered[to]==false, "already transfered claim balance");
+     require( lockedBal[to].lockAddr==to , "noTokenMinted");
+
+     if(block.timestamp >= releaseTime){
+
+      transfer(to, lockedBal[to].amount);
+       transfered[to]=true;
+    } 
+    else{
+      revert Wait_10Minutes(); 
+    }
+
     }
   }
