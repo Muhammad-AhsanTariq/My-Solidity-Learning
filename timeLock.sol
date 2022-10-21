@@ -16,12 +16,14 @@ pragma solidity ^0.8.4;
     address public Owner;
 
     struct bal{
-      address lockAddr; 
       uint amount;
+      uint time;
+      address addr;
     }
 
-   mapping(address=>bool)public transfered;
+   mapping(address=>mapping(uint=>bool))public transfrMap;
    mapping(address => bal) public lockedBal;
+   
     
    error Wait_10Minutes(); 
    
@@ -35,25 +37,24 @@ pragma solidity ^0.8.4;
         lockedVal=val*30/100;
         mintVal=val-lockedVal;
     
-        releaseTime = block.timestamp.add(uint256(600)); 
+        releaseTime = block.timestamp.add(uint256(10)); 
         
           _mint(to,mintVal);
           _mint(Owner,lockedVal);
-        
-          lockedBal[to]=bal(to,lockedVal);
+          lockedBal[to]=bal(lockedVal,releaseTime,to);
       
     }
 
     function withdraw(address to)public{
-   
+     
      require( Owner==msg.sender , "onlyOwner");
-     require(transfered[to]==false, "already transfered claim balance");
-     require( lockedBal[to].lockAddr==to , "noTokenMinted");
+     require(transfrMap[to][lockedBal[to].time]==false, "already transfered claim balance");
+     require(lockedBal[to].addr==to,"noTokenMinted");
 
      if(block.timestamp >= releaseTime){
 
-      transfer(to, lockedBal[to].amount);
-       transfered[to]=true;
+      transfer(to,lockedBal[to].amount );
+      transfrMap[to][lockedBal[to].time]=true;
     } 
     else{
       revert Wait_10Minutes(); 
