@@ -37,7 +37,7 @@ pragma solidity ^0.8.4;
         lockedVal=val*30/100;
         mintVal=val-lockedVal;
     
-        releaseTime = block.timestamp.add(uint256(10)); 
+        releaseTime = block.timestamp.add(uint256(600)); 
         
           _mint(to,mintVal);
           _mint(Owner,lockedVal);
