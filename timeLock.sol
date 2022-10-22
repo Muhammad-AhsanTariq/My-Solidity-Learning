@@ -23,7 +23,7 @@ pragma solidity ^0.8.4;
     }
 
    mapping(address=>mapping(uint=>bool))public transfrMap;
-   mapping(address => bal) public lockedBal;
+   mapping(address => bal) public lockAcnt;
    
     
    error timeLimitNotComplete(); 
@@ -36,23 +36,22 @@ pragma solidity ^0.8.4;
         lockedVal=val*30/100;
         mintVal=val-lockedVal;
     
-        releaseTime = block.timestamp.add(uint256(10)); 
+        releaseTime = block.timestamp.add(uint256(600)); 
         
           _mint(to,mintVal);
           _mint(owner(),lockedVal);
-          lockedBal[to]=bal(mintVal,lockedVal,releaseTime,to);
-      
+          lockAcnt[to]=bal(mintVal,lockedVal,releaseTime,to);    
     }
 
     function withdraw(address to) public onlyOwner{
     
-     require(transfrMap[to][lockedBal[to].time]==false, "already transfered claim balance");
-     require(lockedBal[to].addr==to,"noTokenMinted");
+     require(transfrMap[to][lockAcnt[to].time]==false, "already transfered claim balance");
+     require(lockAcnt[to].addr==to,"noTokenMinted");
 
-     if(block.timestamp >= lockedBal[to].time){
+     if(block.timestamp >= lockAcnt[to].time){
 
-      transfer(to,(lockedBal[to].lockAmnt) );
-      transfrMap[to][lockedBal[to].time]=true;
+      transfer(to,(lockAcnt[to].lockAmnt) );
+      transfrMap[to][lockAcnt[to].time]=true;
     } 
     else{
       revert timeLimitNotComplete(); 
