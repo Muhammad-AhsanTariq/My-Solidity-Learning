@@ -24,7 +24,8 @@ pragma solidity ^0.8.4;
 
    mapping(address=>mapping(uint=>bool))public transfrMap;
    mapping(address => bal) public lockedBal;
-  
+   
+    
    error timeLimitNotComplete(); 
    
     constructor() ERC20("MyToken", "MTK") {}
@@ -35,7 +36,7 @@ pragma solidity ^0.8.4;
         lockedVal=val*30/100;
         mintVal=val-lockedVal;
     
-        releaseTime = block.timestamp.add(uint256(600)); 
+        releaseTime = block.timestamp.add(uint256(10)); 
         
           _mint(to,mintVal);
           _mint(owner(),lockedVal);
@@ -48,9 +49,9 @@ pragma solidity ^0.8.4;
      require(transfrMap[to][lockedBal[to].time]==false, "already transfered claim balance");
      require(lockedBal[to].addr==to,"noTokenMinted");
 
-     if(block.timestamp >= releaseTime){
+     if(block.timestamp >= lockedBal[to].time){
 
-      transfer(to,lockedBal[to].lockAmnt );
+      transfer(to,(lockedBal[to].lockAmnt) );
       transfrMap[to][lockedBal[to].time]=true;
     } 
     else{
