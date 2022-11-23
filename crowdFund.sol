@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
  contract crowdFund is ERC20,Ownable {
 
-   
-    constructor() ERC20("MyToken", "MTK") {
-          
-        pledgeAddr = (address(this));
-   
-    }
+ constructor() ERC20("MyToken", "MTK") {
+  pledgeAddr = (address(this));
+  }
     
  struct Campaign {
 
@@ -40,13 +37,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     mapping(uint => mapping(address => uint)) public pledgedAmount;
     mapping(uint => user)public _address;
    
-   function mint( address to,uint256 amount) public{
+   function mint(
+       address to,
+       uint256 amount)public {
         _mint(to, amount);
     }
 
     function launch(
-        uint _goal
-       ) public onlyOwner {
+        uint _goal) public onlyOwner {
 
         _startAt = block.timestamp;
         _endAt = block.timestamp+uint(600);
@@ -59,22 +57,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
             endAt: _endAt,
             claimed: false
         });
+   }
 
-    }
-
-    function pledges(address from,uint _id, uint _amount) public  {
+    function pledges(uint _id, uint _amount) public  {
         Campaign storage campaign = campaigns[_id];
         require(block.timestamp >= campaign.startAt, "not started");
         require(block.timestamp <= campaign.endAt, "ended");
          
         campaign.pledged += _amount;
       
-      
-        pledgedAmount[_id][from] += _amount;
-       _address[_id] = user(from,pledgeAddr);
-       
-
-       _transfer(from,pledgeAddr,_amount);
+       pledgedAmount[_id][msg.sender] += _amount;
+       _address[_id] = user(msg.sender,pledgeAddr);
+        _transfer(msg.sender,pledgeAddr,_amount);
     
     }
 
@@ -89,7 +83,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
       
         _transfer(pledgeAddr,to, _amount);
 
-       
     }
 
     function claim(uint _id) public {
@@ -101,7 +94,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
         campaign.claimed = true;
         _transfer(pledgeAddr,campaign.creator, campaign.pledged);
-
     
     }
 
@@ -110,8 +102,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
         require(campaign.creator == msg.sender, "not creator");
         require(block.timestamp >= campaign.startAt, "started");
 
-        delete campaigns[_id];
-       
+        delete campaigns[_id]; 
     }
 
     function refund(uint _id) public {
@@ -128,5 +119,4 @@ import "@openzeppelin/contracts/access/Ownable.sol";
       
     }
 
-
-}
+ }
